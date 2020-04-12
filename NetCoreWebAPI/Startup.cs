@@ -1,15 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using NetCoreWebAPI.CustomMiddlewares;
+using NetCoreWebAPI.DataAccess;
+using NetCoreWebAPI.Formatter;
 
 namespace NetCoreWebAPI
 {
@@ -25,7 +22,15 @@ namespace NetCoreWebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+                        // configure basic authentication 
+            services.AddAuthentication("BasicAuthentication")
+                .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
+            services.AddScoped<IProductDal, EfProductDal>();
+            services.AddMvc(options =>
+            {
+                //options.OutputFormatters.Insert(0, new VcardOutputFormatter());
+                options.OutputFormatters.Add(new VcardOutputFormatter());
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -35,16 +40,15 @@ namespace NetCoreWebAPI
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseRouting();
             app.UseHttpsRedirection();
 
-            app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute("DefaultRoute", "api/{controller=product}/{action=get}");
+                endpoints.MapControllers();
             });
         }
     }

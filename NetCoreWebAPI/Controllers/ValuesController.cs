@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace NetCoreWebAPI.Controllers
 {
+    //Eğer burada authorize kullanırsam tüm metotlar için geçerli olur.
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ValuesController : ControllerBase
@@ -17,7 +20,8 @@ namespace NetCoreWebAPI.Controllers
         {
             return new string[] { "value1", "value2" };
         }
-
+        
+        [Authorize] // Sadece bu metot için geçerli.
         // GET: api/Values/5
         [HttpGet("{id}", Name = "Get")]
         public string Get(int id)
